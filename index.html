@@ -6,6 +6,7 @@
     <title>Dubai CV Architect</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -36,22 +37,47 @@
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
           background-color: white !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
+        
+        /* Hide everything by default */
+        body > * {
+           display: none !important;
+        }
+
+        /* Show root but hide its children not involved in print */
+        body > #root {
+           display: block !important;
+           margin: 0 !important;
+           padding: 0 !important;
+        }
+
+        /* This technique ensures only the print-area is visible and positioned correctly */
+        body * {
+          visibility: hidden; 
+        }
+
+        .print-area, .print-area * {
+          visibility: visible !important;
+        }
+
+        .print-area {
+          position: absolute !important;
+          left: 0 !important;
+          top: 0 !important;
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 15mm !important;
+          background: white !important;
+          box-shadow: none !important;
+          display: block !important;
+        }
+
         .no-print {
           display: none !important;
         }
-        .print-area {
-          display: block !important;
-          width: 100% !important;
-          max-width: none !important;
-          min-height: 0 !important;
-          margin: 0 !important;
-          padding: 15mm !important;
-          box-shadow: none !important;
-          border: none !important;
-          overflow: visible !important;
-        }
-        /* Ensure specific elements don't break awkwardly across pages */
+        
         h1, h2, h3, h4 {
           break-after: avoid;
         }
@@ -69,7 +95,9 @@
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
     "pdfjs-dist": "https://esm.sh/pdfjs-dist@3.11.174",
-    "mammoth": "https://esm.sh/mammoth@1.6.0"
+    "mammoth": "https://esm.sh/mammoth@1.6.0",
+    "docx": "https://esm.sh/docx@8.5.0",
+    "file-saver": "https://esm.sh/file-saver@2.0.5"
   }
 }
 </script>

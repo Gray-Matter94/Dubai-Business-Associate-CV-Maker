@@ -23,11 +23,13 @@ export interface CVData {
     year: string;
   }[];
   languages?: string[];
+  atsScore?: number;
 }
 
 export enum AppState {
   INPUT = 'INPUT',
   PROCESSING = 'PROCESSING',
   PREVIEW = 'PREVIEW',
+  EDITING = 'EDITING',
   ERROR = 'ERROR'
 }

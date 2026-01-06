@@ -47,7 +47,15 @@ export const CVInput: React.FC<CVInputProps> = ({ value, onChange, onSubmit, isL
   useEffect(() => {
     // Initialize PDF.js worker
     if (typeof window !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://esm.sh/pdfjs-dist@3.11.174/build/pdf.worker.min.mjs';
+        const lib = pdfjsLib as any;
+        // Check for .default structure (common with CDN imports) or direct structure
+        const workerOptions = lib.GlobalWorkerOptions || lib.default?.GlobalWorkerOptions;
+        
+        if (workerOptions) {
+            workerOptions.workerSrc = 'https://esm.sh/pdfjs-dist@3.11.174/build/pdf.worker.min.mjs';
+        } else {
+            console.warn("Could not initialize PDF.js worker: GlobalWorkerOptions not found");
+        }
     }
   }, []);
 
@@ -69,7 +77,15 @@ export const CVInput: React.FC<CVInputProps> = ({ value, onChange, onSubmit, isL
 
   const extractTextFromPdf = async (arrayBuffer: ArrayBuffer): Promise<string> => {
     try {
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const lib = pdfjsLib as any;
+        // Safe access to getDocument
+        const getDocument = lib.getDocument || lib.default?.getDocument;
+        
+        if (!getDocument) {
+            throw new Error("PDF parser not initialized properly.");
+        }
+
+        const pdf = await getDocument({ data: arrayBuffer }).promise;
         let fullText = '';
         
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -81,13 +97,19 @@ export const CVInput: React.FC<CVInputProps> = ({ value, onChange, onSubmit, isL
         return fullText;
     } catch (e) {
         console.error("PDF Parse Error", e);
-        throw new Error("Could not parse PDF file.");
+        throw new Error("Could not parse PDF file. Ensure it is a valid text-based PDF.");
     }
   };
 
   const extractTextFromDocx = async (arrayBuffer: ArrayBuffer): Promise<string> => {
       try {
-          const result = await mammoth.extractRawText({ arrayBuffer });
+          // Safe access to mammoth
+          const lib = (mammoth as any).default || mammoth;
+          if (!lib || !lib.extractRawText) {
+              throw new Error("DOCX parser not initialized.");
+          }
+          
+          const result = await lib.extractRawText({ arrayBuffer });
           return result.value;
       } catch (e) {
           console.error("DOCX Parse Error", e);
@@ -127,7 +149,7 @@ export const CVInput: React.FC<CVInputProps> = ({ value, onChange, onSubmit, isL
         }
 
         if (!extractedText.trim()) {
-            throw new Error("No text could be extracted from this file.");
+            throw new Error("No text could be extracted from this file. It might be scanned or empty.");
         }
 
         if (extractedText.length > MAX_CHARS) {

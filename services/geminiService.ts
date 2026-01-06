@@ -13,6 +13,15 @@ Rules for the UAE Market:
 5.  **Image**: Dubai employers value prestige and polish. Transform mundane tasks into strategic achievements.
 6.  **Structure**: Ensure there is a strong professional summary that pitches the candidate immediately.
 
+**ATS Scoring Logic**:
+You must evaluate the resulting CV content against Applicant Tracking System (ATS) criteria:
+- Presence of essential contact info (Location, Email, Phone).
+- Use of strong action verbs (e.g., Spearheaded, Orchestrated, Optimized).
+- Quantifiable achievements (numbers, percentages).
+- Clarity of role titles and dates.
+- Relevance of skills to a Business Associate role.
+Assign a score from 0 to 100. A score above 85 is excellent.
+
 Input: Raw text from a user's current CV.
 Output: A structured JSON object adhering to the schema provided. 
 If the input lacks specific details (like a phone number), use placeholders like "[Phone Number]" but DO NOT invent fake professional experience.
@@ -78,8 +87,9 @@ export const transformCV = async (originalText: string): Promise<CVData> => {
               },
             },
             languages: { type: Type.ARRAY, items: { type: Type.STRING } },
+            atsScore: { type: Type.INTEGER, description: "ATS Score from 0 to 100" },
           },
-          required: ["fullName", "summary", "experience", "education", "skills"],
+          required: ["fullName", "summary", "experience", "education", "skills", "atsScore"],
         },
       },
     });

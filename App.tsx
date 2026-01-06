@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Hero } from './components/Hero';
 import { CVInput } from './components/CVInput';
 import { CVPreview } from './components/CVPreview';
+import { CVEditForm } from './components/CVEditForm';
 import { transformCV } from './services/geminiService';
 import { CVData, AppState } from './types';
-import { Sparkles, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Sparkles, AlertTriangle, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.INPUT);
@@ -38,6 +39,19 @@ const App: React.FC = () => {
     setAppState(AppState.INPUT);
     setError(null);
   };
+  
+  const handleUpdateCV = (updatedData: CVData) => {
+      setCvData(updatedData);
+      setAppState(AppState.PREVIEW);
+  };
+
+  // Calculate color for ATS score
+  const getScoreColor = (score?: number) => {
+    if (!score) return 'text-gray-500';
+    if (score >= 85) return 'text-green-600';
+    if (score >= 70) return 'text-yellow-600';
+    return 'text-red-500';
+  };
 
   if (showHero) {
     return <Hero onStart={handleStart} />;
@@ -54,7 +68,15 @@ const App: React.FC = () => {
                         <span className="font-serif font-bold text-xl text-dubai-dark">Dubai CV Architect</span>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <span className="text-xs text-gray-500 font-medium bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
+                        {(appState === AppState.PREVIEW || appState === AppState.EDITING) && cvData?.atsScore && (
+                             <div className="flex items-center px-3 py-1 rounded-full bg-gray-50 border border-gray-200 mr-2">
+                                <CheckCircle2 className={`w-4 h-4 mr-2 ${getScoreColor(cvData.atsScore)}`} />
+                                <span className="text-sm font-semibold text-gray-700">
+                                    ATS Score: <span className={getScoreColor(cvData.atsScore)}>{cvData.atsScore}/100</span>
+                                </span>
+                             </div>
+                        )}
+                        <span className="hidden md:inline-block text-xs text-gray-500 font-medium bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
                            Powered by Gemini 2.0
                         </span>
                     </div>
@@ -105,7 +127,20 @@ const App: React.FC = () => {
 
                 {appState === AppState.PREVIEW && cvData && (
                     <div className="fade-in">
-                        <CVPreview data={cvData} onEdit={() => setAppState(AppState.INPUT)} />
+                        <CVPreview 
+                            data={cvData} 
+                            onEdit={() => setAppState(AppState.EDITING)} 
+                        />
+                    </div>
+                )}
+                
+                {appState === AppState.EDITING && cvData && (
+                    <div className="fade-in">
+                        <CVEditForm 
+                            initialData={cvData}
+                            onSave={handleUpdateCV}
+                            onCancel={() => setAppState(AppState.PREVIEW)}
+                        />
                     </div>
                 )}
             </div>
