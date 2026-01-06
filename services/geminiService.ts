@@ -89,7 +89,11 @@ export const transformCV = async (originalText: string): Promise<CVData> => {
       throw new Error("No response from AI");
     }
 
-    return JSON.parse(text) as CVData;
+    // Sanitize the output to remove any Markdown formatting (backticks) that the model might include
+    // despite the responseMimeType setting.
+    const cleanedText = text.replace(/^```json\s*/, "").replace(/^```\s*/, "").replace(/```$/, "").trim();
+
+    return JSON.parse(cleanedText) as CVData;
   } catch (error) {
     console.error("Error transforming CV:", error);
     throw error;
