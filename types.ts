@@ -24,6 +24,7 @@ export interface CVData {
   }[];
   languages?: string[];
   atsScore?: number;
+  photo?: string;
 }
 
 export enum AppState {

@@ -247,8 +247,20 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
       >
         {/* Header - Always Clean */}
         <header className={`${layoutMode === 'modern' ? 'border-b-2 border-dubai-gold pb-6 mb-8' : 'border-b border-gray-300 pb-4 mb-6'} break-inside-avoid`}>
-          <div className="flex justify-between items-end">
-            <div>
+          <div className="flex items-center gap-6">
+            
+            {/* Optional Photo - Only in Modern Layout */}
+            {layoutMode === 'modern' && data.photo && (
+                <div className="flex-shrink-0">
+                    <img 
+                        src={data.photo} 
+                        alt={data.fullName} 
+                        className="w-32 h-40 object-cover rounded-md shadow-md border-2 border-white ring-1 ring-gray-200"
+                    />
+                </div>
+            )}
+
+            <div className="flex-grow">
               <h1 className={`${layoutMode === 'modern' ? 'text-4xl' : 'text-3xl'} font-serif font-bold text-dubai-dark uppercase tracking-wide mb-2`}>
                 {data.fullName}
               </h1>
@@ -256,7 +268,9 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
                 {data.professionalTitle}
               </p>
             </div>
-            <div className="text-right text-sm space-y-1">
+            
+            {/* Contact Info - Right Aligned */}
+            <div className="text-right text-sm space-y-1 min-w-[180px]">
                {[data.contact.location, data.contact.email, data.contact.phone].filter(Boolean).map((item, i) => (
                     <div key={i} className="text-gray-600">{item}</div>
                ))}
