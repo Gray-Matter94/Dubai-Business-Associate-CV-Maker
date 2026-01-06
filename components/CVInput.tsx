@@ -1,23 +1,53 @@
 import React, { useState, useCallback } from 'react';
-import { FileText, Upload, AlertCircle } from 'lucide-react';
+import { FileText, Upload, AlertCircle, AlertTriangle } from 'lucide-react';
 
 interface CVInputProps {
   onSubmit: (text: string) => void;
   isLoading: boolean;
 }
 
+const MAX_CHARS = 25000;
+const MAX_FILE_SIZE = 50 * 1024; // 50KB
+
 export const CVInput: React.FC<CVInputProps> = ({ onSubmit, isLoading }) => {
   const [text, setText] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newText = e.target.value;
+    if (newText.length <= MAX_CHARS) {
+      setText(newText);
+      setError(null);
+    } else {
+      setError(`Text limit reached (${MAX_CHARS} characters max).`);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    setError(null);
+    
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        setError(`File is too large (${(file.size / 1024).toFixed(1)}KB). Max size is 50KB.`);
+        setFileName(null);
+        return;
+      }
+
       setFileName(file.name);
       const reader = new FileReader();
       reader.onload = (event) => {
         const content = event.target?.result as string;
-        setText(content);
+        if (content.length > MAX_CHARS) {
+           setError(`File content exceeds character limit (${MAX_CHARS}).`);
+           setText(content.slice(0, MAX_CHARS));
+        } else {
+           setText(content);
+        }
+      };
+      reader.onerror = () => {
+        setError("Failed to read file.");
       };
       reader.readAsText(file);
     }
@@ -25,7 +55,7 @@ export const CVInput: React.FC<CVInputProps> = ({ onSubmit, isLoading }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (text.trim()) {
+    if (text.trim() && !error) {
       onSubmit(text);
     }
   };
@@ -44,17 +74,29 @@ export const CVInput: React.FC<CVInputProps> = ({ onSubmit, isLoading }) => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Paste CV Text
-          </label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Paste CV Text
+            </label>
+            <span className={`text-xs ${text.length > MAX_CHARS * 0.9 ? 'text-red-500' : 'text-gray-400'}`}>
+              {text.length}/{MAX_CHARS}
+            </span>
+          </div>
           <textarea
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleTextChange}
             className="w-full h-64 p-4 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-dubai-gold focus:border-transparent transition-all resize-none font-mono text-sm"
             placeholder="Paste the content of your resume here..."
             disabled={isLoading}
           />
         </div>
+
+        {error && (
+          <div className="flex items-center p-3 text-sm text-red-600 bg-red-50 rounded-lg">
+            <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0" />
+            {error}
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <div className="flex-1 mr-4">
@@ -69,10 +111,10 @@ export const CVInput: React.FC<CVInputProps> = ({ onSubmit, isLoading }) => {
           
           <button
             type="submit"
-            disabled={!text.trim() || isLoading}
+            disabled={!text.trim() || isLoading || !!error}
             className={`
               flex items-center justify-center px-8 py-3 text-white font-medium rounded-lg transition-all
-              ${!text.trim() || isLoading 
+              ${!text.trim() || isLoading || !!error
                 ? 'bg-gray-300 cursor-not-allowed' 
                 : 'bg-dubai-gold hover:bg-yellow-600 shadow-lg hover:shadow-xl hover:-translate-y-0.5'
               }

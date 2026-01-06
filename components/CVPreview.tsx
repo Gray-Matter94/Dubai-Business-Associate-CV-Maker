@@ -7,6 +7,20 @@ interface CVPreviewProps {
   onEdit?: () => void;
 }
 
+// Ensure external links are safe and have a protocol
+const sanitizeUrl = (url: string) => {
+  if (!url) return '#';
+  try {
+    // If it lacks a protocol, assume https
+    const urlWithProtocol = url.match(/^https?:\/\//i) ? url : `https://${url}`;
+    const parsed = new URL(urlWithProtocol);
+    // Only allow http and https protocols to prevent javascript: vectors
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.toString() : '#';
+  } catch (e) {
+    return '#';
+  }
+};
+
 export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
   const componentRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +85,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
                )}
                {data.contact.linkedin && (
                 <div className="flex items-center justify-end text-gray-600">
-                   <a href={data.contact.linkedin} target="_blank" rel="noreferrer" className="hover:text-dubai-gold transition-colors">LinkedIn Profile</a>
+                   <a href={sanitizeUrl(data.contact.linkedin)} target="_blank" rel="noreferrer" className="hover:text-dubai-gold transition-colors">LinkedIn Profile</a>
                   <Linkedin className="w-3 h-3 ml-2 text-dubai-gold" />
                 </div>
                )}
