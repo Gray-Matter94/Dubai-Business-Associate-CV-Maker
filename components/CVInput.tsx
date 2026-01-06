@@ -1,27 +1,57 @@
-import React, { useState, useCallback } from 'react';
-import { FileText, Upload, AlertCircle, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, Upload, AlertCircle, AlertTriangle, Wand2 } from 'lucide-react';
 
 interface CVInputProps {
-  onSubmit: (text: string) => void;
+  value: string;
+  onChange: (text: string) => void;
+  onSubmit: () => void;
   isLoading: boolean;
 }
 
 const MAX_CHARS = 25000;
 const MAX_FILE_SIZE = 50 * 1024; // 50KB
 
-export const CVInput: React.FC<CVInputProps> = ({ onSubmit, isLoading }) => {
-  const [text, setText] = useState('');
+const SAMPLE_DATA = `John Smith
+Senior Sales Manager
+London, UK | +44 7700 900000 | john.smith@email.com
+
+Summary
+Experienced sales leader with 10 years in software sales. Managed a team of 5. Good at hitting targets and making friends with clients. Want to move to Dubai for new opportunities.
+
+Experience
+Sales Director - Cloud Corp (2018-Present)
+- Increased sales by 20%
+- Managed key accounts in Europe
+- Hired 3 new sales reps
+
+Sales Manager - Tech Solutions (2014-2018)
+- Sold CRM software to small businesses
+- Won "Salesman of the Year" twice
+
+Education
+BA Business, University of Manchester (2014)
+
+Skills
+Sales, CRM, Leadership, Microsoft Office, negotiation
+`;
+
+export const CVInput: React.FC<CVInputProps> = ({ value, onChange, onSubmit, isLoading }) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     if (newText.length <= MAX_CHARS) {
-      setText(newText);
+      onChange(newText);
       setError(null);
     } else {
       setError(`Text limit reached (${MAX_CHARS} characters max).`);
     }
+  };
+
+  const handleLoadSample = () => {
+      onChange(SAMPLE_DATA);
+      setError(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,9 +71,9 @@ export const CVInput: React.FC<CVInputProps> = ({ onSubmit, isLoading }) => {
         const content = event.target?.result as string;
         if (content.length > MAX_CHARS) {
            setError(`File content exceeds character limit (${MAX_CHARS}).`);
-           setText(content.slice(0, MAX_CHARS));
+           onChange(content.slice(0, MAX_CHARS));
         } else {
-           setText(content);
+           onChange(content);
         }
       };
       reader.onerror = () => {
@@ -55,21 +85,34 @@ export const CVInput: React.FC<CVInputProps> = ({ onSubmit, isLoading }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (text.trim() && !error) {
-      onSubmit(text);
+    if (value.trim() && !error) {
+      onSubmit();
     }
   };
 
   return (
     <div className="w-full max-w-3xl mx-auto p-6 bg-white rounded-2xl shadow-xl border border-gray-100">
-      <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-dubai-sand rounded-lg">
-          <FileText className="w-6 h-6 text-dubai-gold" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-3">
+            <div className="p-2 bg-dubai-sand rounded-lg">
+            <FileText className="w-6 h-6 text-dubai-gold" />
+            </div>
+            <div>
+            <h2 className="text-2xl font-serif font-bold text-dubai-dark">Input Your Details</h2>
+            <p className="text-sm text-gray-500">Paste your CV or use sample data.</p>
+            </div>
         </div>
-        <div>
-          <h2 className="text-2xl font-serif font-bold text-dubai-dark">Input Your Details</h2>
-          <p className="text-sm text-gray-500">Paste your current CV text or upload a plain text file.</p>
-        </div>
+        {!value && (
+            <button 
+                type="button"
+                onClick={handleLoadSample}
+                className="text-xs flex items-center text-dubai-gold hover:text-yellow-600 font-medium transition-colors"
+                disabled={isLoading}
+            >
+                <Wand2 className="w-3 h-3 mr-1" />
+                Load Sample
+            </button>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -78,12 +121,12 @@ export const CVInput: React.FC<CVInputProps> = ({ onSubmit, isLoading }) => {
             <label className="block text-sm font-medium text-gray-700">
               Paste CV Text
             </label>
-            <span className={`text-xs ${text.length > MAX_CHARS * 0.9 ? 'text-red-500' : 'text-gray-400'}`}>
-              {text.length}/{MAX_CHARS}
+            <span className={`text-xs ${value.length > MAX_CHARS * 0.9 ? 'text-red-500' : 'text-gray-400'}`}>
+              {value.length}/{MAX_CHARS}
             </span>
           </div>
           <textarea
-            value={text}
+            value={value}
             onChange={handleTextChange}
             className="w-full h-64 p-4 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-dubai-gold focus:border-transparent transition-all resize-none font-mono text-sm"
             placeholder="Paste the content of your resume here..."
@@ -111,10 +154,10 @@ export const CVInput: React.FC<CVInputProps> = ({ onSubmit, isLoading }) => {
           
           <button
             type="submit"
-            disabled={!text.trim() || isLoading || !!error}
+            disabled={!value.trim() || isLoading || !!error}
             className={`
               flex items-center justify-center px-8 py-3 text-white font-medium rounded-lg transition-all
-              ${!text.trim() || isLoading || !!error
+              ${!value.trim() || isLoading || !!error
                 ? 'bg-gray-300 cursor-not-allowed' 
                 : 'bg-dubai-gold hover:bg-yellow-600 shadow-lg hover:shadow-xl hover:-translate-y-0.5'
               }

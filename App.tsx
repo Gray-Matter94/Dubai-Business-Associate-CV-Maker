@@ -4,23 +4,28 @@ import { CVInput } from './components/CVInput';
 import { CVPreview } from './components/CVPreview';
 import { transformCV } from './services/geminiService';
 import { CVData, AppState } from './types';
-import { Sparkles, AlertTriangle } from 'lucide-react';
+import { Sparkles, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.INPUT);
   const [cvData, setCvData] = useState<CVData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showHero, setShowHero] = useState(true);
+  
+  // Lifted state to preserve input when navigating back from preview
+  const [inputText, setInputText] = useState('');
 
   const handleStart = () => {
     setShowHero(false);
   };
 
-  const handleCVSubmit = async (text: string) => {
+  const handleCVSubmit = async () => {
+    if (!inputText.trim()) return;
+    
     setAppState(AppState.PROCESSING);
     setError(null);
     try {
-      const data = await transformCV(text);
+      const data = await transformCV(inputText);
       setCvData(data);
       setAppState(AppState.PREVIEW);
     } catch (err: any) {
@@ -62,13 +67,23 @@ const App: React.FC = () => {
             <div className="max-w-7xl mx-auto">
                 {appState === AppState.INPUT && (
                     <div className="flex flex-col items-center justify-center fade-in">
-                        <CVInput onSubmit={handleCVSubmit} isLoading={false} />
+                        <CVInput 
+                          value={inputText}
+                          onChange={setInputText}
+                          onSubmit={handleCVSubmit} 
+                          isLoading={false} 
+                        />
                     </div>
                 )}
 
                 {appState === AppState.PROCESSING && (
                     <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                        <CVInput onSubmit={() => {}} isLoading={true} />
+                        <CVInput 
+                          value={inputText}
+                          onChange={setInputText}
+                          onSubmit={() => {}} 
+                          isLoading={true} 
+                        />
                     </div>
                 )}
 
@@ -97,11 +112,22 @@ const App: React.FC = () => {
         </main>
 
         {/* Footer */}
-        <footer className="no-print bg-white border-t border-gray-200 py-6 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 text-center">
-                <p className="text-sm text-gray-500">
-                    &copy; {new Date().getFullYear()} Dubai CV Architect. Built for the ambitious.
-                </p>
+        <footer className="no-print bg-white border-t border-gray-200 py-8 mt-auto">
+            <div className="max-w-7xl mx-auto px-4">
+                <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+                    <p className="mb-4 md:mb-0">
+                        &copy; {new Date().getFullYear()} Dubai CV Architect. Built for the ambitious.
+                    </p>
+                    <div className="flex items-center space-x-6">
+                         <div className="flex items-center text-gray-400">
+                            <ShieldCheck className="w-4 h-4 mr-1" />
+                            <span>Data is processed securely via Google Gemini</span>
+                         </div>
+                    </div>
+                </div>
+                <div className="mt-4 text-xs text-gray-400 text-center md:text-left">
+                    Disclaimer: This tool uses Artificial Intelligence to format and enhance your CV. While we strive for accuracy, please review all generated content carefully before applying. We are not responsible for any employment outcomes.
+                </div>
             </div>
         </footer>
     </div>
