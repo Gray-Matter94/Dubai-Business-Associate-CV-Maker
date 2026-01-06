@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { CVData } from '../types';
-import { MapPin, Mail, Phone, Linkedin, Download, Printer } from 'lucide-react';
+import { MapPin, Mail, Phone, Linkedin, Printer } from 'lucide-react';
 
 interface CVPreviewProps {
   data: CVData;
@@ -15,7 +15,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center my-8">
       <div className="no-print w-full max-w-4xl flex justify-between items-center mb-6 px-4">
         <h2 className="text-xl font-bold text-dubai-dark">Your Generated Profile</h2>
         <div className="flex space-x-3">
@@ -40,7 +40,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
         className="print-area w-full max-w-[210mm] min-h-[297mm] bg-white shadow-2xl mx-auto p-[15mm] md:p-[20mm] text-dubai-slate"
       >
         {/* Header */}
-        <header className="border-b-2 border-dubai-gold pb-6 mb-8">
+        <header className="border-b-2 border-dubai-gold pb-6 mb-8 break-inside-avoid">
           <div className="flex justify-between items-end">
             <div>
               <h1 className="text-4xl font-serif font-bold text-dubai-dark uppercase tracking-wide mb-2">
@@ -86,7 +86,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
           <div className="col-span-8 space-y-8">
             
             {/* Summary */}
-            <section>
+            <section className="break-inside-avoid">
               <h3 className="text-sm font-bold text-dubai-dark uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">
                 Professional Profile
               </h3>
@@ -102,7 +102,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
               </h3>
               <div className="space-y-6">
                 {data.experience.map((exp, index) => (
-                  <div key={index} className="relative pl-4 border-l-2 border-dubai-sand">
+                  <div key={index} className="relative pl-4 border-l-2 border-dubai-sand break-inside-avoid">
                     <div className="flex justify-between items-baseline mb-1">
                       <h4 className="font-bold text-gray-900">{exp.role}</h4>
                       <span className="text-xs font-medium text-dubai-gold whitespace-nowrap">{exp.dates}</span>
@@ -129,7 +129,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
           <div className="col-span-4 space-y-8">
             
             {/* Skills */}
-            <section className="bg-gray-50 p-4 rounded-lg">
+            <section className="bg-gray-50 p-4 rounded-lg break-inside-avoid print:bg-gray-50 print:border print:border-gray-100">
               <h3 className="text-sm font-bold text-dubai-dark uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">
                 Core Competencies
               </h3>
@@ -143,13 +143,13 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
             </section>
 
             {/* Education */}
-            <section>
+            <section className="break-inside-avoid">
               <h3 className="text-sm font-bold text-dubai-dark uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">
                 Education
               </h3>
               <div className="space-y-4">
                 {data.education.map((edu, index) => (
-                  <div key={index}>
+                  <div key={index} className="break-inside-avoid">
                     <h4 className="text-sm font-bold text-gray-900">{edu.degree}</h4>
                     <p className="text-xs text-gray-600">{edu.institution}</p>
                     <div className="flex justify-between mt-1 text-xs text-gray-500">
@@ -163,7 +163,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
             
             {/* Languages */}
             {data.languages && data.languages.length > 0 && (
-                <section>
+                <section className="break-inside-avoid">
                 <h3 className="text-sm font-bold text-dubai-dark uppercase tracking-wider border-b border-gray-200 pb-1 mb-3">
                     Languages
                 </h3>
@@ -181,7 +181,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, onEdit }) => {
         </div>
         
         {/* Footer Decoration */}
-        <div className="mt-12 pt-6 border-t border-gray-100 flex justify-center">
+        <div className="mt-12 pt-6 border-t border-gray-100 flex justify-center break-inside-avoid">
              <div className="w-16 h-1 bg-dubai-gold rounded-full opacity-50"></div>
         </div>
       </div>
