@@ -52,7 +52,9 @@ export const CVInput: React.FC<CVInputProps> = ({ value, onChange, onSubmit, isL
         const workerOptions = lib.GlobalWorkerOptions || lib.default?.GlobalWorkerOptions;
         
         if (workerOptions) {
-            workerOptions.workerSrc = 'https://esm.sh/pdfjs-dist@3.11.174/build/pdf.worker.min.mjs';
+            // Use cdnjs for the worker script as it is a classic script bundle, 
+            // avoiding ES module loading issues in workers (NetworkError/importScripts failed)
+            workerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         } else {
             console.warn("Could not initialize PDF.js worker: GlobalWorkerOptions not found");
         }
